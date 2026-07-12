@@ -43,62 +43,91 @@
     <button onclick="addEntry()">📝 记下来</button>
     <button onclick="clearDiary()">🗑️ 清空日记</button>
     <script>
+    <script>
+  // ========== 1. 加载 Firebase 库 ==========
+  // 这些是 Firebase 的工具包，不用管它们怎么来的，加载就行
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+  // ========== 2. 初始化 Firebase（你的钥匙）==========
+  const firebaseConfig = {
+    apiKey: "AIzaSyDQ_myzq62wP3_xjy7V0tn_N04soA-Nkk0",
+    authDomain: "jjtt-9c2de.firebaseapp.com",
+    projectId: "jjtt-9c2de",
+    storageBucket: "jjtt-9c2de.firebasestorage.app",
+    messagingSenderId: "718171268915",
+    appId: "1:718171268915:web:a9c1bf3fd63480920f0046",
+    measurementId: "G-KDRMVDWFSN"
+  };
+
+  // 初始化 Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
      displayDiary();
 
     function addEntry() {
-        let text = document.getElementById('newEntry').value;
-        if (text.trim() === '') {
-            alert('铁子，写点啥呗！');
-            return;
-        }
-
-        let now = new Date();
-        let timeStr = now.toLocaleString('zh-CN');
-
-        // 创建一个日记对象
-        let entry = {
-            time: timeStr,
-            content: text
-        };
-
-        // 1. 从“小抽屉”里把以前的日记全拿出来
-        let diary = JSON.parse(localStorage.getItem('jayjayTaotaoDiary') || '[]');
-
-        // 2. 把新日记塞到数组最前面
-        diary.unshift(entry);
-
-        // 3. 塞回“小抽屉”
-        localStorage.setItem('jayjayTaotaoDiary', JSON.stringify(diary));
-
-        // 4. 重新显示所有日记
-        displayDiary();
-
-        // 5. 清空输入框
-        document.getElementById('newEntry').value = '';
+    let text = document.getElementById('newEntry').value;
+    if (text.trim() === '') {
+      alert('铁子，写点啥呗！');
+      return;
     }
+
+    let now = new Date();
+    let timeStr = now.toLocaleString('zh-CN');
+
+    // 存到 Firestore
+    db.collection('entries').add({
+      content: text,
+      time: timeStr,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      displayDiary();
+      document.getElementById('newEntry').value = '';
+    }).catch((error) => {
+      alert('存失败了：' + error.message);
+    });
+  }
 
     function displayDiary() {
-        let diary = JSON.parse(localStorage.getItem('jayjayTaotaoDiary') || '[]');
-        let container = document.getElementById('entries');
+    let container = document.getElementById('entries');
+    container.innerHTML = '';
 
-        // 清空容器
-        container.innerHTML = '';
-
-        // 一条一条显示
-        diary.forEach(function(entry) {
-            let entryDiv = document.createElement('div');
-            entryDiv.className = 'diary-entry';
-            entryDiv.innerHTML = `<strong>${entry.time}</strong><br>${entry.content}`;
-            container.appendChild(entryDiv);
+    // 从 Firestore 取数据，按时间倒序
+    db.collection('entries')
+      .orderBy('createdAt', 'desc')
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          let data = doc.data();
+          let entryDiv = document.createElement('div');
+          entryDiv.className = 'diary-entry';
+          entryDiv.innerHTML = `<strong>${data.time}</strong><br>${data.content}`;
+          container.appendChild(entryDiv);
         });
-    }
+      }).catch((error) => {
+        container.innerHTML = '加载失败了：' + error.message;
+      });
+  }
 
     function clearDiary() {
-        if (confirm('铁子，确定要把所有日记都删掉吗？')) {
-            localStorage.removeItem('jayjayTaotaoDiary');
-            displayDiary();
-        }
+    if (confirm('铁子，确定要把所有日记都删掉吗？')) {
+      db.collection('entries').get().then((querySnapshot) => {
+        let batch = db.batch();
+        querySnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        return batch.commit();
+      }).then(() => {
+        displayDiary();
+      }).catch((error) => {
+        alert('删除失败：' + error.message);
+      });
     }
+  }
+
+  // 页面加载时显示日记
+  displayDiary();
     </script>
 </body>
 </html>
