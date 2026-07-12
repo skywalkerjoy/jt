@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jay Jay & 桃桃 · 喂食日记</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fef9e7;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 { text-align: center; color: #d4a373; }
+        .diary-entry {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid #faedcd;
+        }
+        button {
+            background-color: #d4a373;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #bc6c25; }
+        textarea { width: 100%; height: 80px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🐦 Jay Jay & 桃桃 · 喂食日记</h1>
+    <div id="entries"></div>
+    <textarea id="newEntry" placeholder="今天喂了什么好吃的？..."></textarea>
+    <br>
+    <button onclick="addEntry()">📝 记下来</button>
+    <button onclick="clearDiary()">🗑️ 清空日记</button>
+    <script>
+     displayDiary();
+
+    function addEntry() {
+        let text = document.getElementById('newEntry').value;
+        if (text.trim() === '') {
+            alert('铁子，写点啥呗！');
+            return;
+        }
+
+        let now = new Date();
+        let timeStr = now.toLocaleString('zh-CN');
+
+        // 创建一个日记对象
+        let entry = {
+            time: timeStr,
+            content: text
+        };
+
+        // 1. 从“小抽屉”里把以前的日记全拿出来
+        let diary = JSON.parse(localStorage.getItem('jayjayTaotaoDiary') || '[]');
+
+        // 2. 把新日记塞到数组最前面
+        diary.unshift(entry);
+
+        // 3. 塞回“小抽屉”
+        localStorage.setItem('jayjayTaotaoDiary', JSON.stringify(diary));
+
+        // 4. 重新显示所有日记
+        displayDiary();
+
+        // 5. 清空输入框
+        document.getElementById('newEntry').value = '';
+    }
+
+    function displayDiary() {
+        let diary = JSON.parse(localStorage.getItem('jayjayTaotaoDiary') || '[]');
+        let container = document.getElementById('entries');
+
+        // 清空容器
+        container.innerHTML = '';
+
+        // 一条一条显示
+        diary.forEach(function(entry) {
+            let entryDiv = document.createElement('div');
+            entryDiv.className = 'diary-entry';
+            entryDiv.innerHTML = `<strong>${entry.time}</strong><br>${entry.content}`;
+            container.appendChild(entryDiv);
+        });
+    }
+
+    function clearDiary() {
+        if (confirm('铁子，确定要把所有日记都删掉吗？')) {
+            localStorage.removeItem('jayjayTaotaoDiary');
+            displayDiary();
+        }
+    }
+    </script>
+</body>
+</html>
+</html>
