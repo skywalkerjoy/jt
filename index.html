@@ -173,14 +173,30 @@
           let data = doc.data();
           let entryDiv = document.createElement('div');
           entryDiv.className = 'diary-entry';
-          entryDiv.innerHTML = `<strong>${data.time}</strong><br>${data.content}`;
+          entryDiv.innerHTML = `
+            <strong>${data.time}</strong>
+            <span style="float: right; cursor: pointer; color: #ccc; font-size: 18px;"
+                  onclick="deleteEntry('${doc.id}')"
+                  title="删除这条">🗑️</span>
+            <br>${data.content}
+          `;
           container.appendChild(entryDiv);
         });
       }).catch((error) => {
         container.innerHTML = '加载失败了：' + error.message;
       });
-  }
-
+}
+function deleteEntry(docId) {
+    if (confirm('确定要删除这条日记吗？')) {
+        db.collection('entries').doc(docId).delete()
+          .then(() => {
+            displayDiary();  // 删完刷新显示
+          })
+          .catch((error) => {
+            alert('删除失败：' + error.message);
+          });
+    }
+}
   // ========== 清空日记 ==========
   function clearDiary() {
     if (confirm('铁子，确定要把所有日记都删掉吗？')) {
