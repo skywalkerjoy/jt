@@ -5,13 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jay Jay & 桃桃 · 喂食日记</title>
    <style>
+    * {
+        box-sizing: border-box;
+    }
+
     body {
         font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-        max-width: 550px;
-        margin: 30px auto;
-        padding: 25px;
         background: linear-gradient(135deg, #f7f9f2 0%, #e8f0d5 100%);
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .main-container {
+        display: flex;
+        gap: 30px;
+        max-width: 1200px;
+        width: 100%;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    /* ========== 左右两侧 ========== */
+    .bird-column {
+        flex: 0 0 220px;
+        background: white;
         border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 20px;
+    }
+
+    .bird-name {
+        color: #6b8f3a;
+        font-size: 20px;
+        margin: 0 0 15px 0;
+    }
+
+    .photo-circle {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 4px dashed #c5d8a4;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #fdfdfb;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .photo-circle:hover {
+        border-color: #6b8f3a;
+    }
+
+    .photo-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .placeholder-text {
+        color: #c5d8a4;
+        font-size: 14px;
+    }
+
+    .upload-btn, .delete-btn {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+        padding: 8px 0;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .upload-btn {
+        background: #7a9f43;
+        color: white;
+        box-shadow: 0 4px 12px rgba(122, 159, 67, 0.3);
+    }
+
+    .upload-btn:hover {
+        background: #5c7a2e;
+    }
+
+    .delete-btn {
+        background: white;
+        color: #ccc;
+        border: 2px solid #eee;
+    }
+
+    .delete-btn:hover {
+        background: #ffecec;
+        color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    /* ========== 中间日记栏 ========== */
+    .diary-column {
+        flex: 1;
+        max-width: 500px;
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
 
@@ -19,15 +126,11 @@
         text-align: center;
         color: #6b8f3a;
         font-size: 24px;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
+        margin: 0 0 20px 0;
     }
 
     .diary-entry {
-        background: white;
+        background: #fdfdfb;
         padding: 16px 20px;
         margin: 12px 0;
         border-radius: 12px;
@@ -69,55 +172,88 @@
         box-shadow: 0 0 0 3px rgba(107, 143, 58, 0.1);
     }
 
-    button {
+    .button-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .button-group button {
         background: #7a9f43;
         color: white;
         border: none;
-        padding: 12px 24px;
+        padding: 12px 20px;
         border-radius: 25px;
         cursor: pointer;
         font-size: 15px;
         font-weight: bold;
-        margin: 5px 8px 5px 0;
         transition: all 0.3s;
         box-shadow: 0 4px 12px rgba(122, 159, 67, 0.3);
     }
 
-    button:hover {
+    .button-group button:hover {
         background: #5c7a2e;
         box-shadow: 0 6px 18px rgba(92, 122, 46, 0.35);
         transform: translateY(-1px);
     }
 
-    button:active {
-        transform: translateY(0);
-    }
+    /* ========== 手机端：改为上下布局 ========== */
+    @media (max-width: 900px) {
+        .main-container {
+            flex-direction: column;
+            align-items: center;
+        }
 
-    .button-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-    }
+        .bird-column {
+            flex: none;
+            width: 100%;
+            max-width: 300px;
+            position: static;
+        }
 
-    .time-badge {
-        color: #4a7c2e;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .content-text {
-        color: #555;
-        line-height: 1.6;
+        .diary-column {
+            width: 100%;
+        }
     }
 </style>
 </head>
 <body>
-    <h1>🐦 Jay Jay & 桃桃 · 喂食日记</h1>
-    <div id="entries"></div>
-    <textarea id="newEntry" placeholder="今天喂了什么好吃的？..."></textarea>
-    <br>
-    <button onclick="addEntry()">📝 记下来</button>
-    <button onclick="clearDiary()">🗑️ 清空日记</button>
+   <div class="main-container">
+    <!-- ========== 左侧：Jay Jay 的照片 ========== -->
+    <div class="bird-column">
+        <h2 class="bird-name">🐦 Jay Jay</h2>
+        <div class="photo-circle" id="jayjayPhoto">
+            <span class="placeholder-text">点击上传</span>
+        </div>
+        <input type="file" id="jayjayFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('jayjay')">
+        <button onclick="document.getElementById('jayjayFile').click()" class="upload-btn">📷 换照片</button>
+        <button onclick="deleteBirdPhoto('jayjay')" class="delete-btn">🗑️ 删除</button>
+    </div>
+
+    <!-- ========== 中间：日记本 ========== -->
+    <div class="diary-column">
+        <h1>📝 喂食日记</h1>
+
+        <div id="entries"></div>
+
+        <textarea id="newEntry" placeholder="今天喂了什么好吃的？..."></textarea>
+        <br>
+        <div class="button-group">
+            <button onclick="addEntry()">📝 记下来</button>
+            <button onclick="clearDiary()">🗑️ 清空日记</button>
+        </div>
+    </div>
+
+    <!-- ========== 右侧：桃桃的照片 ========== -->
+    <div class="bird-column">
+        <h2 class="bird-name">🐦 桃桃</h2>
+        <div class="photo-circle" id="taotaoPhoto">
+            <span class="placeholder-text">点击上传</span>
+        </div>
+        <input type="file" id="taotaoFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('taotao')">
+        <button onclick="document.getElementById('taotaoFile').click()" class="upload-btn">📷 换照片</button>
+        <button onclick="deleteBirdPhoto('taotao')" class="delete-btn">🗑️ 删除</button>
+    </div>
+</div>
     <!-- 加载 Firebase 库 -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -186,6 +322,80 @@
         container.innerHTML = '加载失败了：' + error.message;
       });
 }
+// ========== 上传小鸟照片 ==========
+function uploadBirdPhoto(bird) {
+    let fileInput = document.getElementById(bird + 'File');
+    let file = fileInput.files[0];
+    if (!file) {
+        alert('请先选一张照片');
+        return;
+    }
+
+    let fileName = 'birds/' + bird + '_' + Date.now() + '_' + file.name;
+    let uploadTask = storage.ref(fileName).put(file);
+
+    uploadTask.then((snapshot) => {
+        return snapshot.ref.getDownloadURL();
+    }).then((url) => {
+        // 存到 Firestore，bird 字段标记是 jayjay 还是 taotao
+        return db.collection('birdPhotos').add({
+            bird: bird,
+            photoURL: url,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }).then(() => {
+        loadBirdPhoto(bird);  // 刷新显示
+    }).catch((error) => {
+        alert('上传失败：' + error.message);
+    });
+}
+
+// ========== 加载小鸟照片（显示最新一张）==========
+function loadBirdPhoto(bird) {
+    let container = document.getElementById(bird + 'Photo');
+
+    db.collection('birdPhotos')
+      .where('bird', '==', bird)
+      .orderBy('createdAt', 'desc')
+      .limit(1)
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.empty) {
+            // 没照片，显示占位文字
+            container.innerHTML = '<span class="placeholder-text">点击上传</span>';
+        } else {
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                container.innerHTML = `<img src="${data.photoURL}" alt="${bird}的照片">`;
+            });
+        }
+      }).catch((error) => {
+        container.innerHTML = '<span style="color:red;">加载失败</span>';
+      });
+}
+
+// ========== 删除小鸟照片（删除该鸟的所有照片）==========
+function deleteBirdPhoto(bird) {
+    if (confirm(`确定要删除 ${bird === 'jayjay' ? 'Jay Jay' : '桃桃'} 的照片吗？`)) {
+        // 查出该鸟的所有照片文档
+        db.collection('birdPhotos')
+          .where('bird', '==', bird)
+          .get()
+          .then((querySnapshot) => {
+            let batch = db.batch();
+            querySnapshot.forEach((doc) => {
+              batch.delete(doc.ref);
+            });
+            return batch.commit();
+          })
+          .then(() => {
+            loadBirdPhoto(bird);  // 刷新显示
+          })
+          .catch((error) => {
+            alert('删除失败：' + error.message);
+          });
+    }
+}
 function deleteEntry(docId) {
     if (confirm('确定要删除这条日记吗？')) {
         db.collection('entries').doc(docId).delete()
@@ -216,6 +426,8 @@ function deleteEntry(docId) {
 
   // ========== 页面加载时显示日记 ==========
   displayDiary();
+  loadBirdPhoto('jayjay');   // 加载 Jay Jay 的照片
+  loadBirdPhoto('taotao');   // 加载桃桃的照片
 </script>
     
 </body>
