@@ -231,6 +231,25 @@
 
     <!-- ========== 中间：日记本 ========== -->
     <div class="diary-column">
+        <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 20px;">
+    <!-- Jay Jay -->
+    <div style="text-align: center;">
+        <div id="jayjayPhoto" style="width: 100px; height: 100px; border-radius: 50%; border: 3px dashed #c5d8a4; margin: 0 auto; overflow: hidden; background: #fdfdfb; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <span style="color: #c5d8a4; font-size: 12px;">Jay Jay</span>
+        </div>
+        <input type="file" id="jayjayFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('jayjay')">
+        <button onclick="document.getElementById('jayjayFile').click()" style="margin-top: 5px; background: #7a9f43; color: white; border: none; padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 12px;">📷</button>
+    </div>
+
+    <!-- 桃桃 -->
+    <div style="text-align: center;">
+        <div id="taotaoPhoto" style="width: 100px; height: 100px; border-radius: 50%; border: 3px dashed #c5d8a4; margin: 0 auto; overflow: hidden; background: #fdfdfb; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <span style="color: #c5d8a4; font-size: 12px;">桃桃</span>
+        </div>
+        <input type="file" id="taotaoFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('taotao')">
+        <button onclick="document.getElementById('taotaoFile').click()" style="margin-top: 5px; background: #7a9f43; color: white; border: none; padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 12px;">📷</button>
+    </div>
+</div>
         <h1>📝 喂食日记</h1>
 
         <div id="entries"></div>
@@ -331,15 +350,12 @@ function uploadBirdPhoto(bird) {
         return;
     }
 
-    // 把照片文件读成 Base64 代码
     let reader = new FileReader();
     reader.onload = function(e) {
         let base64 = e.target.result;
-
-        // 直接存到 Firestore
         db.collection('birdPhotos').add({
             bird: bird,
-            photoData: base64,  // 改用 photoData 存代码，不再用 photoURL
+            photoData: base64,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
             loadBirdPhoto(bird);
@@ -350,10 +366,8 @@ function uploadBirdPhoto(bird) {
     reader.readAsDataURL(file);
 }
 
-// ========== 加载小鸟照片（显示最新一张）==========
 function loadBirdPhoto(bird) {
     let container = document.getElementById(bird + 'Photo');
-
     db.collection('birdPhotos')
       .where('bird', '==', bird)
       .orderBy('createdAt', 'desc')
@@ -361,12 +375,11 @@ function loadBirdPhoto(bird) {
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
-            // 没照片，显示占位文字
-            container.innerHTML = '<span class="placeholder-text">点击上传</span>';
+            container.innerHTML = '<span style="color: #c5d8a4; font-size: 12px;">' + (bird === 'jayjay' ? 'Jay Jay' : '桃桃') + '</span>';
         } else {
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
-                container.innerHTML = `<img src="${data.photoData}" alt="${bird}的照片">`;
+                container.innerHTML = '<img src="' + data.photoData + '" style="width:100%; height:100%; object-fit:cover;">';
             });
         }
       }).catch((error) => {
@@ -374,10 +387,8 @@ function loadBirdPhoto(bird) {
       });
 }
 
-// ========== 删除小鸟照片（删除该鸟的所有照片）==========
 function deleteBirdPhoto(bird) {
-    if (confirm(`确定要删除 ${bird === 'jayjay' ? 'Jay Jay' : '桃桃'} 的照片吗？`)) {
-        // 查出该鸟的所有照片文档
+    if (confirm('确定要删除' + (bird === 'jayjay' ? 'Jay Jay' : '桃桃') + '的照片吗？')) {
         db.collection('birdPhotos')
           .where('bird', '==', bird)
           .get()
@@ -389,7 +400,7 @@ function deleteBirdPhoto(bird) {
             return batch.commit();
           })
           .then(() => {
-            loadBirdPhoto(bird);  // 刷新显示
+            loadBirdPhoto(bird);
           })
           .catch((error) => {
             alert('删除失败：' + error.message);
