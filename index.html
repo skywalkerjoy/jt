@@ -172,21 +172,59 @@
 
         // ========== 照片功能 ==========
         function uploadBirdPhoto(bird) {
-            let fileInput = document.getElementById(bird + 'File');
-            let file = fileInput.files[0];
-            if (!file) { alert('请先选一张照片'); return; }
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let base64 = e.target.result;
-                db.collection('birdPhotos').add({
-                    bird: bird,
-                    photoData: base64,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => { loadBirdPhoto(bird); })
-                  .catch((error) => { alert('上传失败：' + error.message); });
-            };
-            reader.readAsDataURL(file);
-        }
+    let fileInput = document.getElementById(bird + 'File');
+    let file = fileInput.files[0];
+    if (!file) {
+        alert('请先选一张照片');
+        return;
+    }
+
+    // 用 canvas 压缩照片
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let img = new Image();
+        img.onload = function() {
+            // 创建 canvas，把图片缩小
+            let canvas = document.createElement('canvas');
+            let maxSize = 400; // 最大宽度或高度 400px
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxSize) {
+                    height = height * (maxSize / width);
+                    width = maxSize;
+                }
+            } else {
+                if (height > maxSize) {
+                    width = width * (maxSize / height);
+                    height = maxSize;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // 压缩成 JPEG，质量 0.6（越小越压）
+            let base64 = canvas.toDataURL('image/jpeg', 0.6);
+
+            // 存到 Firestore
+            db.collection('birdPhotos').add({
+                bird: bird,
+                photoData: base64,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                loadBirdPhoto(bird);
+            }).catch((error) => {
+                alert('上传失败：' + error.message);
+            });
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
 
         function loadBirdPhoto(bird) {
             let container = document.getElementById(bird + 'Photo');
