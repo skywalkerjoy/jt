@@ -331,23 +331,23 @@ function uploadBirdPhoto(bird) {
         return;
     }
 
-    let fileName = 'birds/' + bird + '_' + Date.now() + '_' + file.name;
-    let uploadTask = storage.ref(fileName).put(file);
+    // 把照片文件读成 Base64 代码
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let base64 = e.target.result;
 
-    uploadTask.then((snapshot) => {
-        return snapshot.ref.getDownloadURL();
-    }).then((url) => {
-        // 存到 Firestore，bird 字段标记是 jayjay 还是 taotao
-        return db.collection('birdPhotos').add({
+        // 直接存到 Firestore
+        db.collection('birdPhotos').add({
             bird: bird,
-            photoURL: url,
+            photoData: base64,  // 改用 photoData 存代码，不再用 photoURL
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            loadBirdPhoto(bird);
+        }).catch((error) => {
+            alert('上传失败：' + error.message);
         });
-    }).then(() => {
-        loadBirdPhoto(bird);  // 刷新显示
-    }).catch((error) => {
-        alert('上传失败：' + error.message);
-    });
+    };
+    reader.readAsDataURL(file);
 }
 
 // ========== 加载小鸟照片（显示最新一张）==========
@@ -366,7 +366,7 @@ function loadBirdPhoto(bird) {
         } else {
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
-                container.innerHTML = `<img src="${data.photoURL}" alt="${bird}的照片">`;
+                container.innerHTML = `<img src="${data.photoData}" alt="${bird}的照片">`;
             });
         }
       }).catch((error) => {
