@@ -254,9 +254,10 @@ function changeMonth(delta) {
             }
         }
 
-        // ========== 小鸟留言板功能 ==========
 
-// 显示某只小鸟的留言
+// ========== 留言板功能（访客留言 + 小鸟回复）==========
+
+// 显示某只小鸟的留言和回复
 function displayBirdNotes(bird) {
     let container = document.getElementById(bird + 'Notes');
     container.innerHTML = '';
@@ -267,58 +268,108 @@ function displayBirdNotes(bird) {
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
-            container.innerHTML = '<p style="text-align:center;color:#ccc;font-size:13px;">No notes yet～ 还没有留言</p>';
+            container.innerHTML = '<p style="text-align:center;color:#ccc;font-size:11px;">No notes yet～</p>';
             return;
         }
         querySnapshot.forEach((doc) => {
             let data = doc.data();
             let entryDiv = document.createElement('div');
-            entryDiv.style.cssText = 'background: #fef9e7; padding: 10px 12px; margin: 8px 0; border-radius: 10px; text-align: center; font-style: italic; position: relative;';
-            entryDiv.innerHTML = `
-                <p style="margin: 0; color: #555; font-size: 14px;">"${data.message}"</p>
-                <p style="margin: 6px 0 0 0; font-size: 11px; color: #6b8f3a;">${data.time}</p>
-                <span style="position: absolute; top: 6px; right: 10px; cursor: pointer; color: #ccc; font-size: 13px;"
+            entryDiv.style.cssText = 'margin: 8px 0;';
+
+            // 访客留言
+            let guestHTML = '';
+            if (data.type === 'guest') {
+                guestHTML = `
+                    <div style="background: #e8f0d5; padding: 8px 10px; border-radius: 8px; font-size: 12px;">
+                        <strong>${data.guestName}</strong>: ${data.message}
+                        <span style="float: right; font-size: 10px; color: #999;">${data.time}</span>
+                    </div>
+                `;
+            }
+
+            // 小鸟回复
+            let replyHTML = '';
+            if (data.type === 'reply') {
+                replyHTML = `
+                    <div style="background: #fef9e7; padding: 8px 10px; border-radius: 8px; font-size: 12px; margin-left: 15px; font-style: italic;">
+                        🐦 ${bird === 'jayjay' ? 'Jay Jay' : 'Tao Tao'}: ${data.message}
+                        <span style="float: right; font-size: 10px; color: #999;">${data.time}</span>
+                    </div>
+                `;
+            }
+
+            entryDiv.innerHTML = guestHTML + replyHTML + `
+                <span style="float: right; cursor: pointer; color: #ccc; font-size: 10px;"
                       onclick="deleteBirdNote('${doc.id}', '${bird}')"
                       title="Delete">🗑️</span>
+                <div style="clear: both;"></div>
             `;
             container.appendChild(entryDiv);
         });
       }).catch((error) => {
-        container.innerHTML = 'Failed to load: ' + error.message;
+        container.innerHTML = 'Failed: ' + error.message;
       });
 }
 
-// 添加小鸟留言
-function addBirdNote(bird) {
-    let inputId = bird === 'jayjay' ? 'jayjayNote' : 'taotaoNote';
-    let message = document.getElementById(inputId).value.trim();
+// 访客留言
+function addGuestNote(bird) {
+    let name = document.getElementById(bird + 'GuestName').value.trim();
+    let message = document.getElementById(bird + 'GuestNote').value.trim();
 
-    if (!message) { alert('Write something! 写点什么呗～'); return; }
+    if (!name) { alert('Please enter your name 请输入名字'); return; }
+    if (!message) { alert('Write something 写点什么呗'); return; }
 
     let now = new Date();
     let timeStr = now.toLocaleString('zh-CN');
 
     db.collection('birdNotes').add({
         bird: bird,
+        type: 'guest',
+        guestName: name,
         message: message,
         time: timeStr,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        document.getElementById(inputId).value = '';
+        document.getElementById(bird + 'GuestName').value = '';
+        document.getElementById(bird + 'GuestNote').value = '';
         displayBirdNotes(bird);
     }).catch((error) => {
         alert('Failed: ' + error.message);
     });
 }
 
-// 删除小鸟留言
+// 小鸟回复
+function addBirdReply(bird) {
+    let message = document.getElementById(bird + 'Reply').value.trim();
+
+    if (!message) { alert('Write a reply 写点回复呗'); return; }
+
+    let now = new Date();
+    let timeStr = now.toLocaleString('zh-CN');
+
+    db.collection('birdNotes').add({
+        bird: bird,
+        type: 'reply',
+        message: message,
+        time: timeStr,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        document.getElementById(bird + 'Reply').value = '';
+        displayBirdNotes(bird);
+    }).catch((error) => {
+        alert('Failed: ' + error.message);
+    });
+}
+
+// 删除留言或回复
 function deleteBirdNote(docId, bird) {
-    if (confirm('Delete this note? 确定删除吗？')) {
+    if (confirm('Delete? 确定删除？')) {
         db.collection('birdNotes').doc(docId).delete()
           .then(() => { displayBirdNotes(bird); })
           .catch((error) => { alert('Failed: ' + error.message); });
     }
 }
+
         // ========== 页面加载 ==========
         calendarYear = new Date().getFullYear();
         calendarMonth = new Date().getMonth() + 1;
