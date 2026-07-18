@@ -53,3 +53,17 @@
         }
         button:hover { background: #5c7a2e; }
         .placeholder-text { color: #c5d8a4; font-size: 12px; }
+
+        /* ========== 手机端：留言板改为上下排列 ========== */
+@media (max-width: 900px) {
+    /* 把左侧和右侧留言板的固定定位取消，改成正常流 */
+    div[style*="position: fixed"][style*="left: 15px"],
+    div[style*="position: fixed"][style*="right: 15px"] {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 500px !important;
+        margin: 15px auto !important;
+        max-height: none !important;
+    }
+}
