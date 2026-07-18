@@ -8,6 +8,23 @@
 
 </head>
 <body>
+    <!-- ========== 左侧：Jay Jay 留言板（固定） ========== -->
+<div style="position: fixed; left: 10px; top: 50%; transform: translateY(-50%); width: 200px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; text-align: center;">
+    <h3 style="color: #6b8f3a; font-size: 16px; margin: 0 0 10px 0;">🐦 Jay Jay</h3>
+    <textarea id="jayjayNote" placeholder="Note for Jay Jay..."
+              style="width: 100%; height: 50px; padding: 8px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 12px; margin-bottom: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+    <button onclick="addBirdNote('jayjay')" style="background: #7a9f43; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; width: 100%;">🐦 Leave Note</button>
+    <div id="jayjayNotes" style="margin-top: 10px; max-height: 300px; overflow-y: auto; text-align: left;"></div>
+</div>
+
+<!-- ========== 右侧：桃桃留言板（固定） ========== -->
+<div style="position: fixed; right: 10px; top: 50%; transform: translateY(-50%); width: 200px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; text-align: center;">
+    <h3 style="color: #6b8f3a; font-size: 16px; margin: 0 0 10px 0;">🐦 Tao Tao</h3>
+    <textarea id="taotaoNote" placeholder="Note for Tao Tao..."
+              style="width: 100%; height: 50px; padding: 8px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 12px; margin-bottom: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+    <button onclick="addBirdNote('taotao')" style="background: #7a9f43; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; width: 100%;">🐦 Leave Note</button>
+    <div id="taotaoNotes" style="margin-top: 10px; max-height: 300px; overflow-y: auto; text-align: left;"></div>
+</div>
     <!-- ========== 照片墙 ========== -->
     <div class="photo-row">
         <!-- Jay Jay -->
@@ -66,7 +83,6 @@
     <!-- ========== Firebase ========== -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
     <script src="script.js"></script>
 
 </body>
