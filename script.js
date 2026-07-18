@@ -12,15 +12,23 @@ const firebaseConfig = {
 
         // ========== 日记功能 ==========
         function displayDiary(keyword) {
+    // 1. 先确保旧的容器被彻底销毁
+    let oldContainer = document.getElementById('entries');
+    if (oldContainer) {
+        let newContainer = oldContainer.cloneNode(false); // 克隆一个干干净净的空壳
+        oldContainer.parentNode.replaceChild(newContainer, oldContainer); // 用空壳替换掉旧的
+    }
+
+    // 2. 重新获取最新的干净容器
     let container = document.getElementById('entries');
+    // 万一上面替换后 id 丢失，手动补上
+    if (!container) {
+        container = oldContainer;
+    }
     container.innerHTML = '';
 
+    // 3. 加载数据
     let query = db.collection('entries').orderBy('createdAt', 'desc');
-
-    if (keyword && keyword.trim() !== '') {
-        // 用 Firestore 的 where 做简单搜索（搜不到包含关键词的，只能精确匹配）
-        // 所以我们改成先全部取出来，再在前端过滤
-    }
 
     query.get()
       .then((querySnapshot) => {
@@ -29,13 +37,11 @@ const firebaseConfig = {
             allDocs.push({ id: doc.id, data: doc.data() });
         });
 
-        // 如果有搜索关键词，过滤
         if (keyword && keyword.trim() !== '') {
             let kw = keyword.trim().toLowerCase();
             allDocs = allDocs.filter(doc => doc.data.content.toLowerCase().includes(kw));
         }
 
-        // 记录哪些日期有日记，给日历用
         window.diaryDates = new Set();
         allDocs.forEach(doc => {
             if (doc.data.createdAt) {
@@ -46,9 +52,10 @@ const firebaseConfig = {
                 window.diaryDates.add(dateStr);
             }
         });
-        renderCalendar(); // 更新日历标记
+        renderCalendar();
 
-        // 显示日记
+        // 用 DocumentFragment 一次性渲染，只写一次 DOM，避免重复
+        let fragment = document.createDocumentFragment();
         allDocs.forEach(doc => {
             let data = doc.data;
             let entryDiv = document.createElement('div');
@@ -59,8 +66,10 @@ const firebaseConfig = {
                       onclick="deleteEntry('${doc.id}')">🗑️</span>
                 <br>${data.content}
             `;
-            container.appendChild(entryDiv);
+            fragment.appendChild(entryDiv);
         });
+
+        container.appendChild(fragment);
 
         if (allDocs.length === 0) {
             container.innerHTML = '<p style="text-align:center;color:#999;">没有找到日记</p>';
@@ -251,4 +260,3 @@ function changeMonth(delta) {
         displayDiary();
         loadBirdPhoto('jayjay');
         loadBirdPhoto('taotao');
-        
