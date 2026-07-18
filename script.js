@@ -251,6 +251,4 @@ function changeMonth(delta) {
         displayDiary();
         loadBirdPhoto('jayjay');
         loadBirdPhoto('taotao');
-        displayDiary();
-        loadBirdPhoto('jayjay');
-        loadBirdPhoto('taotao');
+        
