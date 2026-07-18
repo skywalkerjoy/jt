@@ -9,21 +9,47 @@
 </head>
 <body>
     <!-- ========== 左侧：Jay Jay 留言板（固定） ========== -->
-<div style="position: fixed; left: 10px; top: 50%; transform: translateY(-50%); width: 200px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; text-align: center;">
-    <h3 style="color: #6b8f3a; font-size: 16px; margin: 0 0 10px 0;">🐦 Jay Jay</h3>
-    <textarea id="jayjayNote" placeholder="Note for Jay Jay..."
-              style="width: 100%; height: 50px; padding: 8px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 12px; margin-bottom: 6px; box-sizing: border-box; resize: vertical;"></textarea>
-    <button onclick="addBirdNote('jayjay')" style="background: #7a9f43; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; width: 100%;">🐦 Leave Note</button>
-    <div id="jayjayNotes" style="margin-top: 10px; max-height: 300px; overflow-y: auto; text-align: left;"></div>
+<div style="position: fixed; left: 15px; top: 50%; transform: translateY(-50%); width: 280px; background: white; border-radius: 15px; padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 10; max-height: 80vh; overflow-y: auto;">
+    <h3 style="color: #6b8f3a; font-size: 18px; margin: 0 0 12px 0; text-align: center;">🐦 Jay Jay</h3>
+
+    <!-- 访客留言区 -->
+    <p style="font-size: 12px; color: #999; margin: 0 0 6px 0; font-weight: bold;">💬 Guest Note 访客留言</p>
+    <input type="text" id="jayjayGuestName" placeholder="Your name 你的名字"
+           style="width: 100%; padding: 8px 10px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 13px; margin-bottom: 8px; box-sizing: border-box;">
+    <textarea id="jayjayGuestNote" placeholder="Leave a note... 留句话..."
+              style="width: 100%; height: 50px; padding: 8px 10px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 13px; margin-bottom: 8px; box-sizing: border-box; resize: vertical;"></textarea>
+    <button onclick="addGuestNote('jayjay')" style="background: #7a9f43; color: white; border: none; padding: 8px 0; border-radius: 20px; cursor: pointer; font-size: 13px; width: 100%; margin-bottom: 15px; font-weight: bold;">💬 Guest Note</button>
+
+    <!-- 小鸟回复区 -->
+    <p style="font-size: 12px; color: #999; margin: 0 0 6px 0; font-weight: bold;">🐦 Jay Jay's Reply 小鸟回复</p>
+    <textarea id="jayjayReply" placeholder="Reply as Jay Jay... 替Jay Jay回复..."
+              style="width: 100%; height: 50px; padding: 8px 10px; border-radius: 8px; border: 2px solid #f0c060; font-size: 13px; margin-bottom: 8px; box-sizing: border-box; resize: vertical;"></textarea>
+    <button onclick="addBirdReply('jayjay')" style="background: #f0c060; color: white; border: none; padding: 8px 0; border-radius: 20px; cursor: pointer; font-size: 13px; width: 100%; margin-bottom: 15px; font-weight: bold;">🐦 Bird Reply</button>
+
+    <!-- 留言和回复列表 -->
+    <div id="jayjayNotes" style="text-align: left;"></div>
 </div>
 
 <!-- ========== 右侧：桃桃留言板（固定） ========== -->
-<div style="position: fixed; right: 10px; top: 50%; transform: translateY(-50%); width: 200px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; text-align: center;">
-    <h3 style="color: #6b8f3a; font-size: 16px; margin: 0 0 10px 0;">🐦 Tao Tao</h3>
-    <textarea id="taotaoNote" placeholder="Note for Tao Tao..."
-              style="width: 100%; height: 50px; padding: 8px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 12px; margin-bottom: 6px; box-sizing: border-box; resize: vertical;"></textarea>
-    <button onclick="addBirdNote('taotao')" style="background: #7a9f43; color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; width: 100%;">🐦 Leave Note</button>
-    <div id="taotaoNotes" style="margin-top: 10px; max-height: 300px; overflow-y: auto; text-align: left;"></div>
+<div style="position: fixed; right: 15px; top: 50%; transform: translateY(-50%); width: 280px; background: white; border-radius: 15px; padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 10; max-height: 80vh; overflow-y: auto;">
+    <h3 style="color: #6b8f3a; font-size: 18px; margin: 0 0 12px 0; text-align: center;">🐦 Tao Tao</h3>
+
+    <!-- 访客留言区 -->
+    <p style="font-size: 12px; color: #999; margin: 0 0 6px 0; font-weight: bold;">💬 Guest Note 访客留言</p>
+    <input type="text" id="taotaoGuestName" placeholder="Your name 你的名字"
+           style="width: 100%; padding: 8px 10px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 13px; margin-bottom: 8px; box-sizing: border-box;">
+    <textarea id="taotaoGuestNote" placeholder="Leave a note... 留句话..."
+              style="width: 100%; height: 50px; padding: 8px 10px; border-radius: 8px; border: 2px solid #c5d8a4; font-size: 13px; margin-bottom: 8px; box-sizing: border-box; resize: vertical;"></textarea>
+    <button onclick="addGuestNote('taotao')" style="background: #7a9f43; color: white; border: none; padding: 8px 0; border-radius: 20px; cursor: pointer; font-size: 13px; width: 100%; margin-bottom: 15px; font-weight: bold;">💬 Guest Note</button>
+
+    <!-- 小鸟回复区 -->
+    <p style="font-size: 12px; color: #999; margin: 0 0 6px 0; font-weight: bold;">🐦 Tao Tao's Reply 小鸟回复</p>
+    <textarea id="taotaoReply" placeholder="Reply as Tao Tao... 替桃桃回复..."
+              style="width: 100%; height: 50px; padding: 8px 10px; border-radius: 8px; border: 2px solid #f0c060; font-size: 13px; margin-bottom: 8px; box-sizing: border-box; resize: vertical;"></textarea>
+    <button onclick="addBirdReply('taotao')" style="background: #f0c060; color: white; border: none; padding: 8px 0; border-radius: 20px; cursor: pointer; font-size: 13px; width: 100%; margin-bottom: 15px; font-weight: bold;">🐦 Bird Reply</button>
+
+    <!-- 留言和回复列表 -->
+    <div id="taotaoNotes" style="text-align: left;"></div>
 </div>
     <!-- ========== 照片墙 ========== -->
     <div class="photo-row">
