@@ -8,6 +8,32 @@
 
 </head>
 <body>
+      <!-- ========== 照片墙 ========== -->
+    <div class="photo-row">
+        <!-- Jay Jay -->
+        <div class="bird-box">
+            <div class="name">🐦 Jay Jay</div>
+            <div class="photo-circle" id="jayjayPhoto">
+                <span class="placeholder-text">Jay Jay</span>
+            </div>
+            <input type="file" id="jayjayFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('jayjay')">
+            <button class="photo-btn" onclick="document.getElementById('jayjayFile').click()">📷</button>
+            <br>
+            <button class="delete-photo-btn" onclick="deleteBirdPhoto('jayjay')">🗑️</button>
+        </div>
+
+        <!-- 桃桃 -->
+        <div class="bird-box">
+            <div class="name">🐦 桃桃</div>
+            <div class="photo-circle" id="taotaoPhoto">
+                <span class="placeholder-text">桃桃</span>
+            </div>
+            <input type="file" id="taotaoFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('taotao')">
+            <button class="photo-btn" onclick="document.getElementById('taotaoFile').click()">📷</button>
+            <br>
+            <button class="delete-photo-btn" onclick="deleteBirdPhoto('taotao')">🗑️</button>
+        </div>
+    </div>
      <!-- ========== 日记区域 ========== -->
     <!-- ========== 日历 ========== -->
 <div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center;">
@@ -78,34 +104,7 @@
     <!-- 留言和回复列表 -->
     <div id="taotaoNotes" style="text-align: left;"></div>
 </div>
-    <!-- ========== 照片墙 ========== -->
-    <div class="photo-row">
-        <!-- Jay Jay -->
-        <div class="bird-box">
-            <div class="name">🐦 Jay Jay</div>
-            <div class="photo-circle" id="jayjayPhoto">
-                <span class="placeholder-text">Jay Jay</span>
-            </div>
-            <input type="file" id="jayjayFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('jayjay')">
-            <button class="photo-btn" onclick="document.getElementById('jayjayFile').click()">📷</button>
-            <br>
-            <button class="delete-photo-btn" onclick="deleteBirdPhoto('jayjay')">🗑️</button>
-        </div>
-
-        <!-- 桃桃 -->
-        <div class="bird-box">
-            <div class="name">🐦 桃桃</div>
-            <div class="photo-circle" id="taotaoPhoto">
-                <span class="placeholder-text">桃桃</span>
-            </div>
-            <input type="file" id="taotaoFile" accept="image/*" style="display:none;" onchange="uploadBirdPhoto('taotao')">
-            <button class="photo-btn" onclick="document.getElementById('taotaoFile').click()">📷</button>
-            <br>
-            <button class="delete-photo-btn" onclick="deleteBirdPhoto('taotao')">🗑️</button>
-        </div>
-    </div>
-
-    
+      
 
     <!-- ========== Firebase ========== -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
