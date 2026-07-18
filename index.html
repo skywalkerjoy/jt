@@ -91,7 +91,27 @@
     </div>
 
     <!-- ========== 日记区域 ========== -->
-    <h1>📝 喂食日记</h1>
+    <!-- ========== 日历 ========== -->
+<div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button onclick="changeMonth(-1)" style="background: none; border: none; color: #6b8f3a; font-size: 18px; cursor: pointer; padding: 5px 10px;">◀</button>
+        <span id="currentMonth" style="color: #6b8f3a; font-weight: bold; font-size: 16px;"></span>
+        <button onclick="changeMonth(1)" style="background: none; border: none; color: #6b8f3a; font-size: 18px; cursor: pointer; padding: 5px 10px;">▶</button>
+    </div>
+    <div id="calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-size: 13px;"></div>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-size: 11px; color: #999; margin-bottom: 5px;">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    </div>
+</div>
+
+<!-- ========== 搜索框 ========== -->
+<div style="margin-bottom: 15px;">
+    <input type="text" id="searchInput" placeholder="🔍 搜索日记..."
+           style="width: 100%; padding: 10px 15px; border-radius: 20px; border: 2px solid #c5d8a4; font-size: 14px; box-sizing: border-box;"
+           oninput="searchDiary()">
+</div>
+
+<h1>📝 喂食日记</h1>
     <div id="entries"></div>
     <textarea id="newEntry" placeholder="今天喂了什么好吃的？..."></textarea>
     <br>
@@ -115,26 +135,118 @@
         const db = firebase.firestore();
 
         // ========== 日记功能 ==========
-        function displayDiary() {
-            let container = document.getElementById('entries');
-            container.innerHTML = '';
-            db.collection('entries').orderBy('createdAt', 'desc').get()
-              .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    let data = doc.data();
-                    let entryDiv = document.createElement('div');
-                    entryDiv.className = 'diary-entry';
-                    entryDiv.innerHTML = `
-                        <strong>${data.time}</strong>
-                        <span style="float: right; cursor: pointer; color: #ccc; font-size: 18px;" onclick="deleteEntry('${doc.id}')">🗑️</span>
-                        <br>${data.content}
-                    `;
-                    container.appendChild(entryDiv);
-                });
-              }).catch((error) => {
-                container.innerHTML = '加载失败了：' + error.message;
-              });
+        function displayDiary(keyword) {
+    let container = document.getElementById('entries');
+    container.innerHTML = '';
+
+    let query = db.collection('entries').orderBy('createdAt', 'desc');
+
+    if (keyword && keyword.trim() !== '') {
+        // 用 Firestore 的 where 做简单搜索（搜不到包含关键词的，只能精确匹配）
+        // 所以我们改成先全部取出来，再在前端过滤
+    }
+
+    query.get()
+      .then((querySnapshot) => {
+        let allDocs = [];
+        querySnapshot.forEach((doc) => {
+            allDocs.push({ id: doc.id, data: doc.data() });
+        });
+
+        // 如果有搜索关键词，过滤
+        if (keyword && keyword.trim() !== '') {
+            let kw = keyword.trim().toLowerCase();
+            allDocs = allDocs.filter(doc => doc.data.content.toLowerCase().includes(kw));
         }
+
+        // 记录哪些日期有日记，给日历用
+        window.diaryDates = new Set();
+        allDocs.forEach(doc => {
+            if (doc.data.createdAt) {
+                let date = doc.data.createdAt.toDate();
+                let dateStr = date.getFullYear() + '-' +
+                              String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                              String(date.getDate()).padStart(2, '0');
+                window.diaryDates.add(dateStr);
+            }
+        });
+        renderCalendar(); // 更新日历标记
+
+        // 显示日记
+        allDocs.forEach(doc => {
+            let data = doc.data;
+            let entryDiv = document.createElement('div');
+            entryDiv.className = 'diary-entry';
+            entryDiv.innerHTML = `
+                <strong>${data.time}</strong>
+                <span style="float: right; cursor: pointer; color: #ccc; font-size: 18px;"
+                      onclick="deleteEntry('${doc.id}')">🗑️</span>
+                <br>${data.content}
+            `;
+            container.appendChild(entryDiv);
+        });
+
+        if (allDocs.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#999;">没有找到日记</p>';
+        }
+      }).catch((error) => {
+        container.innerHTML = '加载失败了：' + error.message;
+      });
+}
+       function searchDiary() {
+    let keyword = document.getElementById('searchInput').value;
+    displayDiary(keyword);
+}
+
+// 当前显示的年月
+let calendarYear = new Date().getFullYear();
+let calendarMonth = new Date().getMonth() + 1;
+
+function renderCalendar() {
+    let container = document.getElementById('calendar');
+    let monthSpan = document.getElementById('currentMonth');
+
+    monthSpan.innerText = calendarYear + '年 ' + calendarMonth + '月';
+
+    let firstDay = new Date(calendarYear, calendarMonth - 1, 1).getDay(); // 本月第一天是星期几
+    let daysInMonth = new Date(calendarYear, calendarMonth, 0).getDate(); // 本月有多少天
+
+    let html = '';
+
+    // 填充前面的空白
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div></div>';
+    }
+
+    // 填充日期
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateStr = calendarYear + '-' +
+                      String(calendarMonth).padStart(2, '0') + '-' +
+                      String(day).padStart(2, '0');
+        let hasDiary = window.diaryDates && window.diaryDates.has(dateStr);
+        let style = hasDiary ?
+                    'background: #7a9f43; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto;' :
+                    '';
+        html += '<div style="' + style + '">' + day + '</div>';
+    }
+
+    container.innerHTML = html;
+}
+
+function changeMonth(delta) {
+    calendarMonth += delta;
+    if (calendarMonth > 12) {
+        calendarMonth = 1;
+        calendarYear++;
+    }
+    if (calendarMonth < 1) {
+        calendarMonth = 12;
+        calendarYear--;
+    }
+    // 重新加载日记，日历会自动更新
+    let keyword = document.getElementById('searchInput').value;
+    displayDiary(keyword);
+}
 
         function addEntry() {
             let text = document.getElementById('newEntry').value;
@@ -258,6 +370,11 @@
         }
 
         // ========== 页面加载 ==========
+        calendarYear = new Date().getFullYear();
+        calendarMonth = new Date().getMonth() + 1;
+        displayDiary();
+        loadBirdPhoto('jayjay');
+        loadBirdPhoto('taotao');
         displayDiary();
         loadBirdPhoto('jayjay');
         loadBirdPhoto('taotao');
