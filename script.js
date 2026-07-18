@@ -254,9 +254,76 @@ function changeMonth(delta) {
             }
         }
 
+        // ========== 小鸟留言板功能 ==========
+
+// 显示某只小鸟的留言
+function displayBirdNotes(bird) {
+    let container = document.getElementById(bird + 'Notes');
+    container.innerHTML = '';
+
+    db.collection('birdNotes')
+      .where('bird', '==', bird)
+      .orderBy('createdAt', 'desc')
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.empty) {
+            container.innerHTML = '<p style="text-align:center;color:#ccc;font-size:13px;">No notes yet～ 还没有留言</p>';
+            return;
+        }
+        querySnapshot.forEach((doc) => {
+            let data = doc.data();
+            let entryDiv = document.createElement('div');
+            entryDiv.style.cssText = 'background: #fef9e7; padding: 10px 12px; margin: 8px 0; border-radius: 10px; text-align: center; font-style: italic; position: relative;';
+            entryDiv.innerHTML = `
+                <p style="margin: 0; color: #555; font-size: 14px;">"${data.message}"</p>
+                <p style="margin: 6px 0 0 0; font-size: 11px; color: #6b8f3a;">${data.time}</p>
+                <span style="position: absolute; top: 6px; right: 10px; cursor: pointer; color: #ccc; font-size: 13px;"
+                      onclick="deleteBirdNote('${doc.id}', '${bird}')"
+                      title="Delete">🗑️</span>
+            `;
+            container.appendChild(entryDiv);
+        });
+      }).catch((error) => {
+        container.innerHTML = 'Failed to load: ' + error.message;
+      });
+}
+
+// 添加小鸟留言
+function addBirdNote(bird) {
+    let inputId = bird === 'jayjay' ? 'jayjayNote' : 'taotaoNote';
+    let message = document.getElementById(inputId).value.trim();
+
+    if (!message) { alert('Write something! 写点什么呗～'); return; }
+
+    let now = new Date();
+    let timeStr = now.toLocaleString('zh-CN');
+
+    db.collection('birdNotes').add({
+        bird: bird,
+        message: message,
+        time: timeStr,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        document.getElementById(inputId).value = '';
+        displayBirdNotes(bird);
+    }).catch((error) => {
+        alert('Failed: ' + error.message);
+    });
+}
+
+// 删除小鸟留言
+function deleteBirdNote(docId, bird) {
+    if (confirm('Delete this note? 确定删除吗？')) {
+        db.collection('birdNotes').doc(docId).delete()
+          .then(() => { displayBirdNotes(bird); })
+          .catch((error) => { alert('Failed: ' + error.message); });
+    }
+}
         // ========== 页面加载 ==========
         calendarYear = new Date().getFullYear();
         calendarMonth = new Date().getMonth() + 1;
         displayDiary();
         loadBirdPhoto('jayjay');
         loadBirdPhoto('taotao');
+        displayBirdNotes('jayjay');
+        displayBirdNotes('taotao');
